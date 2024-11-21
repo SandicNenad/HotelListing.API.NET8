@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using HotelListing.API.Configurations;
 using HotelListing.API.Contracts;
 using HotelListing.API.Data;
@@ -37,6 +38,21 @@ builder.Services.AddCors(options =>
         b => b.AllowAnyHeader()
             .AllowAnyOrigin()
             .AllowAnyMethod());
+});
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader("api-version"),
+        new HeaderApiVersionReader("X-Version"),
+        new MediaTypeApiVersionReader("ver"));
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 builder.Host.UseSerilog((context, logerConfiguration) => logerConfiguration.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
