@@ -5,6 +5,7 @@ using AutoMapper;
 using HotelListing.API.Contracts;
 using HotelListing.API.Models.Hotel;
 using Microsoft.AspNetCore.Authorization;
+using HotelListing.API.Models;
 
 namespace HotelListing.API.Controllers
 {
@@ -21,8 +22,8 @@ namespace HotelListing.API.Controllers
             _hotelsRepository = hotelsRepository;
         }
 
-        // GET: api/Hotels
-        [HttpGet]
+        // GET: api/Hotels/GetAll
+        [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<GetHotelDto>>> GetHotels()
         {
             var hotels = await _hotelsRepository.GetAllAsync();
@@ -30,20 +31,29 @@ namespace HotelListing.API.Controllers
             return Ok(result);
         }
 
+        // GET: api/Hotels/?StartIndex=0&pagesize=25&PageNumber=1
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<GetHotelDto>>> GetPagedHotels([FromQuery] QueryParameters queryParameters)
+        {
+            var pagedHotelsResult = await _hotelsRepository.GetAllAsync<GetHotelDto>(queryParameters);            
+            return Ok(pagedHotelsResult);
+        }
+
         // GET: api/Hotels/5
         [HttpGet("{id}")]
         public async Task<ActionResult<HotelDto>> GetHotel(int id)
         {
-            var hotel = await _hotelsRepository.GetAsync(id);
+            //var hotel = await _hotelsRepository.GetAsync(id);
+            var hotel = await _hotelsRepository.GetAsync<HotelDto>(id);
 
             if (hotel == null)
             {
                 return NotFound();
             }
 
-            var result = _mapper.Map<HotelDto>(hotel);
+            //var result = _mapper.Map<HotelDto>(hotel);
 
-            return Ok(result);
+            return Ok(hotel);
         }
 
         // PUT: api/Hotels/5
