@@ -8,19 +8,20 @@ using Microsoft.AspNetCore.Authorization;
 using HotelListing.API.Exceptions;
 using HotelListing.API.Models;
 using Asp.Versioning;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace HotelListing.API.Controllers
 {
     [Route("api/countries")]
     [ApiController]
-    [ApiVersion("1.0", Deprecated = true)]
-    public class CountriesController : ControllerBase
+    [ApiVersion("2.0")]
+    public class CountriesControllerV2 : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ICountriesRepository _countriesRepository;
-        private readonly ILogger<CountriesController> _logger;
+        private readonly ILogger<CountriesControllerV2> _logger;
 
-        public CountriesController(IMapper mapper, ICountriesRepository countriesRepository, ILogger<CountriesController> logger)
+        public CountriesControllerV2(IMapper mapper, ICountriesRepository countriesRepository, ILogger<CountriesControllerV2> logger)
         {
             _mapper = mapper;
             _countriesRepository = countriesRepository;
@@ -29,6 +30,7 @@ namespace HotelListing.API.Controllers
 
         // GET: api/Countries/GetAll
         [HttpGet("GetAll")]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
             var countries = await _countriesRepository.GetAllAsync();
