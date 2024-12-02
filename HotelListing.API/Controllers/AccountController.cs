@@ -1,7 +1,6 @@
-﻿using HotelListing.API.Contracts;
-using HotelListing.API.Models.Users;
+﻿using HotelListing.API.Core.Contracts;
+using HotelListing.API.Core.Models.Users;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelListing.API.Controllers
@@ -11,10 +10,12 @@ namespace HotelListing.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAuthManager _authManager;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAuthManager authManager)
+        public AccountController(IAuthManager authManager, ILogger<AccountController> logger)
         {
             _authManager = authManager;
+            _logger = logger;
         }
 
         // POST: api/Account/register
@@ -25,7 +26,8 @@ namespace HotelListing.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Register([FromBody] ApiUserDto apiUserDto)
         {
-            var errors = await _authManager.Register(apiUserDto);
+            _logger.LogInformation($"Registration Attemp for {apiUserDto.Email}");
+            var errors = await _authManager.Register(apiUserDto, "User");
 
             if (errors.Any())
             {
@@ -48,7 +50,7 @@ namespace HotelListing.API.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> RegisterAdmin([FromBody] ApiUserDto apiUserDto)
         {
-            var errors = await _authManager.RegisterAdmin(apiUserDto);
+            var errors = await _authManager.Register(apiUserDto, "Administrator");
 
             if (errors.Any())
             {
@@ -70,6 +72,7 @@ namespace HotelListing.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
+            _logger.LogInformation($"Login attempt by {loginDto.Email}");
             var authResponse = await _authManager.Login(loginDto);
 
             if (authResponse is null)
